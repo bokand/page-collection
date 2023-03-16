@@ -99,6 +99,16 @@ Without being overly prescriptive, this proposal specifies that browsers should 
 
 In some contexts or circumstances, the user agent may decide opening all links is inappropriate or infeasible (e.g. see [opt-in](#anchor-link-opt-in) and [permission](#permissions) sections. Instead, the user agent may provide a friendly single-page "fallback" which shows a clickable link to each linked resource.
 
+We also extended `text/uri-list` (in a backwards compatible way) to allow adding some configuration options. Options can be specified at the end of the resource by placing a key=value pair in a comment with ‘?’ as the first character. For example:
+
+https://en.wikipedia.org/wiki/Cat
+https://www.reddit.com/r/catmemes/
+#?group-name=Cat Links
+
+Only a single configuration option will be supported at this time: `group-name`. A user agents can use this to label the group of opened pages in its UI.
+
+Unrecognized options or content following the first “#?” line will be ignored.
+
 ### Introduce a new URI scheme: uri-list
 
 Handling `text/uri-list` is enough to enable page collections but, on its own, has significant drawbacks which will hamper its adoption.
@@ -146,7 +156,13 @@ https://acme.org
 https://w3c.org
 ```
 
-The scheme is defined in more detail in [this draft](uri-scheme.md).
+The `uri-list` will also map query parameters to the aforementioned configuration options extension of `text/uri-list`, e.g.:
+
+```
+uri-list:https://example.com;https://acme.org;https://w3c.org?group-name=Research%20links
+```
+
+Note that this is unambiguous as the `uri-list` grammar requires percent-encoding '?' in the component URIs. The scheme is defined in more detail in [this draft](uri-scheme.md).
 
 ### Anchor link opt-in
 
@@ -322,24 +338,6 @@ It also precludes native-to-web use cases, such as opening a collection from a u
 ### Future extension
 
 Should page collection links become common, applications may wish to enable enhancements to make them more useful. This section explores some potential ideas and how page collections could be adapted in a backwards-compatible way. These ideas are omitted from the proposal but listed here to ensure such future extensibility is considered.
-
-#### Additional Options
-
-User agents may wish to provide some amount of customization of the grouping UI, for example, providing a group color or title. One way to extend the proposal in that direction is by appending options as special comment lines in a `text/uri-list` resource, e.g.:
-
-```
-https://a.com
-https://b.com
-https://c.com
-#?type=grid-view
-#?title=My example
-```
-
-These can be mapped from the `uri-list` scheme via URI query string ('?' in the individual component URIs must be percent encoded), for example:
-
-```
-uri-list:a.com;b.com;c.com?type=grid-view&title=My%20example
-```
 
 #### Hierarchical Lists
 
