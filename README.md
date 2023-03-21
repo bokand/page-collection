@@ -209,7 +209,7 @@ The experience of receiving a `text/uri-list` in a non-implementing user agent w
 
 Since the browser will know ahead of time whether a link may open a page-collection (see the [Anchor-link-opt-in section](#anchor-link-opt-in)), it can append `text/uri-list` to the `Accept:` header of the request. The server can use the absence of this media type as a signal to serve a fallback, for example: an HTML page with a list clickable links.
 
-Note: The HTML spec [discourages](https://wiki.whatwg.org/wiki/Why_not_conneg) content-negotiation as a solution, though this seems less like a "choice" and more like a feature-detection. A better alternative for request-time feature detection is welcome. Perhaps a `<meta>` tag on an always-served fallback page that supporting agents can interpret as `text/uri-list` content and open.
+_Note: The HTML spec [discourages](https://wiki.whatwg.org/wiki/Why_not_conneg) content-negotiation as a solution, though this seems less like a "choice" and more like a feature-detection which could be removed in the future. Is there a better alternative for request-time feature detection? One option would be a `<meta>` tag on an always-served fallback page that supporting agents can interpret as `text/uri-list` content and open. But that would lose the redirect chain which is useful for permissions._
 
 ## Considerations
 
