@@ -12,6 +12,14 @@ Page collections aims to allow the user agent to be more helpful in opening and 
 
 This explainer details ideas and challenges for this new form of linking. While some examples are provided, no grouping UI is suggested or mandated by this proposal; how such a link is presented is left to the discretion of the user agent.
 
+### Summarized Web-Facing Changes
+
+  * Specify web browser handling of `text/uri-list` media types.
+  * Introduce a `uri-list:` URI scheme to allow users to easily share collection links.
+  * Add an opt-in for for anchors to non-`uri-list` schemes to allow opening a collection.
+  * Define a permission model for when a collection link may open multiple windows.
+  * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
+
 ## Status
 
 This is a very early-stages proposal. We're looking for feedback about the ideas and feasibility. This explainer will evolve as the idea is refined. Critiques, alternate approaches and ideas are all welcome.
@@ -65,14 +73,6 @@ We envision browsers experimenting with new kinds of UIs in the future. For this
 _Note: In addition, browsers could provide users with a convenient UI to create collection links; for example, by selecting multiple tabs to share. However, this doesn’t affect interoperability of these links so isn’t discussed here._
 
 ## Proposal
-
-The proposed changes can be broken down into a few areas of the web platform requiring additions or changes:
-
-  * Specify web browser handling of `text/uri-list` media types.
-  * Introduce a `uri-list:` URI scheme to allow users to easily share collection links.
-  * Add an opt-in for for links to non-`uri-list` schemes to allow opening a collection.
-  * Define a permission model for when a collection link is allowed to be opened.
-  * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
 
 ### Handling text/uri-list media type
 
