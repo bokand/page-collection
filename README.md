@@ -138,7 +138,7 @@ Another method that does avoid indirection is to use a data URI (defined in [RFC
 However, links like this have usability issues that would be more easily addressed with a new scheme:
 
 * Users of plaintext communication apps (e.g. instant messaging, e-mail, etc.) often rely on the app “linkifying” a plaintext URI so the recipient can open it with a click. This doesn't happen for `data:` URIs. While a new scheme will also require updates in such apps to support linkification, `uri-list:` is less flexible than `data:`, making this more straightforward for linkifier software.
-* `data:` URIs can contain any kind of data, including executable script. Users can (and should) be weary of clicking such links. Promoting such links might unintentionally train users to be more trusting of potentially unsafe `data:` links.
+* `data:` URIs can contain any kind of data, including executable script. Users can (and should) be wary of clicking such links. Promoting such links might unintentionally train users to be more trusting of potentially unsafe `data:` links.
 * Because `data:` URIs can be dangerous, they’re explicitly blocked in certain contexts. For example, most web browsers block `data:` URIs in anchor links. Some browsers block HTTP redirects to `data:` URIs. Basing security restrictions on a `data:`'s media type seems unappealing.
 * The `text/uri-list` media type uses newlines as a delimiter and accepts comments, making for messier links. A `uri-list:` scheme allows for a friendlier syntax and mapping.
 
