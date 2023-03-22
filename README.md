@@ -101,13 +101,15 @@ In some contexts or circumstances, the user agent may decide opening all links i
 
 We also extended `text/uri-list` (in a backwards compatible way) to allow adding some configuration options. Options can be specified at the end of the resource by placing a key=value pair in a comment with ‘?’ as the first character. For example:
 
+```
 https://en.wikipedia.org/wiki/Cat
 https://www.reddit.com/r/catmemes/
 #?group-name=Cat Links
+```
 
 Only a single configuration option will be supported at this time: `group-name`. A user agents can use this to label the group of opened pages in its UI.
 
-Unrecognized options or content following the first “#?” line will be ignored.
+Unrecognized options or content following the first `#?` line will be ignored.
 
 ### Introduce a new URI scheme: uri-list
 
@@ -117,8 +119,8 @@ As noted in [WebArch](https://www.w3.org/TR/webarch/#URI-scheme:~:text=While%20W
 
 Some alternatives we've considered:
 
-  * A new HTML element (e.g. <anchor-list>)
-  * A new attribute on the existing <a> element.
+  * A new HTML element (e.g. `<anchor-list>`)
+  * A new attribute on the existing `<a>` element.
   * A plain HTTP URI to a server responding with a `Content-Type: text/uri-list` header and a list of URIs in the response body.
 
 Each of these comes with significant drawbacks:
@@ -162,7 +164,7 @@ The `uri-list` will also map query parameters to the aforementioned configuratio
 uri-list:https://example.com;https://acme.org;https://w3c.org?group-name=Research%20links
 ```
 
-Note that this is unambiguous as the `uri-list` grammar requires percent-encoding '?' in the component URIs. The scheme is defined in more detail in [this draft](uri-scheme.md).
+Note that this is unambiguous as the `uri-list` grammar requires percent-encoding `?` characters in the component URIs. The scheme is defined in more detail in [this draft](uri-scheme.md).
 
 ### Anchor link opt-in
 
