@@ -2,27 +2,42 @@
 
 ## Summary
 
-This is a proposal to enable users and authors to group multiple resources into a single link. An agent navigating to such a link will load and present all its resources in a grouping UI. We're calling such a link a "page collection":
+It's common for users browsing the web to open and refer to multiple pages in a single journey. For example, when doing research on a
+complex topic, comparing products when shopping, or planning a trip or outing. Browsers have adapted to this by introducing tabbed UIs, and
+later allowing grouping of related tabs. However, linking on the web remains 1-to-1; one link opens one page. This makes it difficult
+to share complicated context with a user.
+
+This is a proposal to enable grouping multiple destinations into a single link. A browser opening such a link will open each of the
+constituent pages in a grouping UI, such as a tab group.
+
+A concrete example: get a link to all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab group
+containing the same pages.
+
+We're calling such a link a "page collection", a possible example of how it might look:
 
 ```
 uri-list:https://example.com/pageA;https://en.wikipedia.org/wiki/URL;https://w3.org
 ```
 
-Page collections aims to allow the user agent to be more helpful in opening and presenting multiple related pages.
+A page collection allows the browser to be more helpful in managing and presenting groups of related pages.
 
-This explainer details ideas and challenges for this new form of linking. While some examples are provided, no grouping UI is suggested or mandated by this proposal; how such a link is presented is left to the discretion of the user agent.
+This explainer details ideas and challenges for this new form of linking. While some examples of "grouping UI" are provided, particularily
+with existing mechanisms such as tab groups, no specific UI is suggested or mandated in this proposal; how such a link is presented is left
+to the discretion of the user agent.
 
-### Summarized Web-Facing Changes
+### Non-Goals
 
-  * Specify web browser handling of `text/uri-list` media types.
-  * Introduce a `uri-list:` URI scheme to allow users to easily share collection links.
-  * Add an opt-in for for anchors to non-`uri-list` schemes to allow opening a collection.
-  * Define a permission model for when a collection link may open multiple windows.
-  * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
+  * Resource Bundling - each link in a page collection is intended to be an individual destination for the end user. They are grouped
+    because they are related somehow within the user's journey but there is no implied dependency or relationship between the constituent
+    links themselves.
+  * Interoperable collaboration - there are emerging features that allow users to live-collaborate on a [shared group of
+    tabs](#shared-tab-groups). While there's some overlap and potential for page collections to improve these features in the short term,
+    our goal is to enable a richer linking primitive.
 
 ## Status
 
-This is a very early-stages proposal. We're looking for feedback about the ideas and feasibility. This explainer will evolve as the idea is refined. Critiques, alternate approaches and ideas are all welcome.
+This is a very early-stages proposal. We're looking for feedback about the ideas and feasibility. This explainer will evolve as the idea is
+refined. Critiques, alternate approaches and ideas are all welcome.
 
 ## Example Use Cases
 
@@ -30,24 +45,18 @@ This is a very early-stages proposal. We're looking for feedback about the ideas
 
   Alice and Bob are planning to take a summer trip together and are planning their vacation.
 
-  Alice does some research on potential accommodations and collects various options in open tabs in her browser. She requests that her browser generate a link from the multiple tabs into a single page collection link.
-  
-  <p align="center"><img src="pc-example1.png" alt="Alice sharing a tab group"></p>
-  
-  Alice sends the link to Bob for review via a messaging app.
-  
-  <p align="center"><img src="pc-example2.png" alt="Alice sends a link to the collection via a messaging app"></p>
-  
-  Bob clicks on the link which opens a tab group in his browser containing all the options Alice has presented.
-    
-  <p align="center"><img src="pc-example3.png" alt="Bob sees the tab group opened in his browser"></p>
-    
+  Alice does some research on potential accommodations and collects various options in open tabs in her browser. She requests that her
+  browser generate a link from the multiple tabs into a single page collection link. Alice sends the link to Bob for review via a messaging
+  app. Bob opens the link in his browser which opens a tab group containing all the options Alice has presented.
+
+  <p align="center"><img src="pc-example.png" alt="Alice shares a tab group with Bob by generating a link, sending it in a message. Bob opens the same tab group in his browser."></p>
+
 * Publishing
-  
+
   An industry newsletter collects interesting news stories (from various sites across the web) relevant to its subscribers. Each week it collects the stories into a single page collection link and adds the link to the weekly newsletter.
 
   Each Monday, Pat opens the link to read the week’s news. Pat’s browser opens the collection as a carousel, allowing Pat to easily flip through the week’s news stories.
-    
+
 * Commerce
 
   A small digital retailer wants to provide a comparison function on their website. Users can select multiple products and click “Compare”, which opens a collection featuring all the selected products.
@@ -62,6 +71,8 @@ This is a very early-stages proposal. We're looking for feedback about the ideas
 
   Jasmine’s default browser is opened and displays a collection featuring all of the links from the e-mail message. Jasmine reviews all the drafts before returning to her mailbox to reply to her colleague.
 
+* Many more: academic research/reading, company onboarding, etc.
+
 ## UI Treatment
 
 Opening multiple pages simultaneously requires a user’s browser to have some kind of UI to manage multiple pages.
@@ -72,7 +83,27 @@ We envision browsers experimenting with new kinds of UIs in the future. For this
 
 _Note: In addition, browsers could provide users with a convenient UI to create collection links; for example, by selecting multiple tabs to share. However, this doesn’t affect interoperability of these links so isn’t discussed here._
 
+### Shared Tab Groups
+
+In addition to the general "tab groups" feature available in some browsers, sharing tab groups is available in Safari, via [Shared Tab
+Groups](https://support.apple.com/en-ca/guide/safari/ibrw7f189b02/mac), and in Edge, via [Edge
+Workspaces](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-workspaces).
+
+Both heavily focus on "live collaboration" features that are out of scope for page collections but the basic premise is to share a group
+of tabs with other users. Both cases currently work with a proprietary link that isn't functional outside their respective browser.
+
+Page collections could serve as a base layer of interoperability - users in all browsers would at least be able to access the shared tabs,
+with additional proprietary features available when opened from matching browsers.
+
 ## Proposal
+
+### Summarized Web-Facing Changes
+
+  * Specify web browser handling of `text/uri-list` media types.
+  * Introduce a `uri-list:` URI scheme to allow users to easily share collection links.
+  * Add an opt-in for for anchors to non-`uri-list` schemes to allow opening a collection.
+  * Define a permission model for when a collection link may open multiple windows.
+  * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
 
 ### Handling text/uri-list media type
 
