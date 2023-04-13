@@ -9,8 +9,10 @@ allowing grouping of related tabs.
 It's also common for users to share content with others, get their thoughts, and make decisions together. Yet, the web's sharing mechanism,
 the link, remains 1-to-1; one link opens one page. This makes it difficult to share complicated context.
 
-This is a proposal to enable grouping multiple destinations into a single link -  a 1-to-many link. A browser opening such a link will open
+This is a proposal to enable grouping multiple destinations into a single link, a 1-to-many link. A browser opening such a link will open
 each of the constituent pages in a grouping UI, such as a tab group.
+
+<p align="center"><img src="pagecollection.svg" alt="A link click on a page collection URL opens multiple pages"></p>
 
 A concrete example: get a link to all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab group
 containing the same pages.
