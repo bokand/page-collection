@@ -3,9 +3,11 @@
 ## Summary
 
 It's common for users browsing the web to open and refer to multiple pages in a single journey. For example, when doing research on a
-complex topic, comparing products when shopping, or planning a trip or outing. Browsers have adapted to this by introducing tabbed UIs, and
-later allowing grouping of related tabs. However, linking on the web remains 1-to-1; one link opens one page. This makes it difficult
-to share complicated context with a user.
+complex topic, comparing products when shopping, or planning a trip or outing. Browsers have facilitated this by introducing tabbed UIs and
+allowing grouping of related tabs.
+
+It's also common for users to share content with others, get their thoughts, and make decisions together. Yet, the web's sharing mechanism,
+the link, remains 1-to-1; one link opens one page. This makes it difficult to share complicated context.
 
 This is a proposal to enable grouping multiple destinations into a single link. A browser opening such a link will open each of the
 constituent pages in a grouping UI, such as a tab group.
