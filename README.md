@@ -9,21 +9,19 @@ allowing grouping of related tabs.
 It's also common for users to share content with others, get their thoughts, and make decisions together. Yet, the web's sharing mechanism,
 the link, remains 1-to-1; one link opens one page. This makes it difficult to share complicated context.
 
-This is a proposal to enable grouping multiple destinations into a single link. A browser opening such a link will open each of the
-constituent pages in a grouping UI, such as a tab group.
+This is a proposal to enable grouping multiple destinations into a single link -  a 1-to-many link. A browser opening such a link will open
+each of the constituent pages in a grouping UI, such as a tab group.
 
 A concrete example: get a link to all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab group
 containing the same pages.
 
-We're calling such a link a "page collection", a possible example of how it might look:
+We're calling such a link a "page collection", an example of how it _might_ look:
 
 ```
 uri-list:https://example.com/pageA;https://en.wikipedia.org/wiki/URL;https://w3.org
 ```
 
-A page collection allows the browser to be more helpful in managing and presenting groups of related pages.
-
-This explainer details ideas and challenges for this new form of linking. While some examples of "grouping UI" are provided, particularily
+This explainer details challenges and ideas for this new form of linking. While some examples of "grouping UI" are provided, particularily
 with existing mechanisms such as tab groups, no specific UI is suggested or mandated in this proposal; how such a link is presented is left
 to the discretion of the user agent.
 
@@ -39,7 +37,7 @@ to the discretion of the user agent.
 ## Status
 
 This is a very early-stages proposal. We're looking for feedback about the ideas and feasibility. This explainer will evolve as the idea is
-refined. Critiques, alternate approaches and ideas are all welcome.
+refined. Critiques, alternate approaches and ideas are all welcome. Feel free to file issues.
 
 ## Example Use Cases
 
@@ -341,7 +339,9 @@ All the usual accessibility issues in UI apply; however, we believe these are al
   
 Using a `data:text/html` URI to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `uri-list:` link.
 
-This was discarded as an option as `data:` URIs are considered non-secure, would lead to exceptionally messy URIs, and would be difficult to linkify in messaging apps.
+This was discarded as an option as `data:` URLs are considered non-secure - even if they could be linkified, we don't want to train users to click on `data:` links.
+
+They'd also lead to exceptionally messy URIs, and would be difficult to linkify in messaging apps.
 
 #### Fragment Directive
 
