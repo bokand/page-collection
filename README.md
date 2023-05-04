@@ -118,7 +118,7 @@ with additional proprietary features available when opened from matching browser
   * Specify web browser handling of `text/uri-list` media types.
   * Introduce a `multi:` URL scheme to allow users to easily share multilinks.
   * Add an opt-in for for anchors to non-`multi` schemes to allow opening multilinks.
-  * Define a permission model for when a collection link may open multiple windows.
+  * Define restrictions for when a multilink can open multiple pages.
   * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
 
 ### Handling text/uri-list media type
@@ -144,12 +144,12 @@ It’s a very simple format: newline separated URLs - allowing comments via line
 
 Today, most browsers render such a response as plain text (a usable fallback for non-implementing user agents!).
 
-Without being overly prescriptive, this proposal specifies that browsers should attempt open each link and group the opened pages together in their
-UI. The exact UI mechanics are left to user agent discretion. One example of such a grouped UI is "tab groups"; however, this could be an area of
-experimentation and exploration.
+Without being overly prescriptive, this proposal specifies that browsers should attempt open each constituent link and group the opened pages together
+in some "multilink view" UI. The exact UI mechanics are left to user agent discretion. One example of such a multilink view could be "tab groups";
+however, this could be an area of experimentation and exploration.
 
 In some contexts or circumstances, the user agent may decide opening all links is inappropriate or infeasible (e.g. see [opt-in](#anchor-link-opt-in)
-and [permission](#permissions) sections. Instead, the user agent may provide a friendly single-page "fallback" which shows a clickable link to each
+and [restrictions](#restrictions) sections. Instead, the user agent may provide a friendly single-page "fallback" which shows a clickable link to each
 linked resource.
 
 We also extended `text/uri-list` (in a backwards compatible way) to allow adding some configuration options. Options can be specified at the end of
@@ -213,7 +213,7 @@ The proposed `multi:` scheme is very similar to `data:text/uri-list`, albeit wit
 operates on a `multi:`, it will interpret the inline data and map it to a `text/uri-list` resource. Here's an example of a `multi` link:
 
 ```
-uri-list:https://example.com;https://acme.org;https://w3c.org
+multi:https://example.com;https://acme.org;https://w3c.org
 ```
 
 Which is mapped to the following `text/uri-list` resource:
@@ -259,20 +259,17 @@ Examples:
 Note: To "block" means to avoid opening all the links simultaneously. The user agent may still wish to present a single-page view listing the links
 (see below).
 
-### Permissions
+### Restrictions
 
-To prevent abuse, user agents may place restrictions on when a multilink is allowed to open. The `allows=uri-list` attribute of `<a>` is one such
-restriction.
+To prevent abuse, user agents may place restrictions on when a multilink is allowed to open into a multilink view:
 
-Another is requiring that opening a multilink is the result of a user action by requiring it be initiated by a user gesture/activation.
+ * Requiring `rel=multilink` on `<a>` or `<area>` and an equivalent `windowFeature` for `window.open`.
+ * The user must explicitly agree to open the multilink view via some sort of confirmation UI. For
+   [example](https://pagecollection.glitch.me/prompt.html):
+   <p align="center"><img height="400" src="inline-prompt.png" alt="A potential confirmation prompt, shown at the link location, allowing the user to see and select URLs and open them into a tab group"></p>
 
-Opening a multilink will also be considered a "[powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature)", requiring the user to
-grant the initiating origin permission to do so.
-
-Note: as this is a navigation feature, the origin the permission grant is associated with is that of the _initiating_ page.
-
-In the absence of these requirements the user agent provides a less functional single page fallback. For example: an HTML page with list of clickable
-links, and a button to open into the browser's grouping UI.
+In the absence of these requirements the user agent can gracefully degrade to a less functional single page fallback. For example: an HTML page with
+list of clickable links, perhaps with a button to open into the browser's multilink view UI.
 
   <p align="center"><img height="600" src="fallback.png" alt="The single page fallback, showing a list of clickable links with a button to open into a new tab group"></p>
 
@@ -305,9 +302,9 @@ a period where support is mixed. Links across the web should work for all users.
 
 To this end, multilinks allow:
 
-* Content negotiation for server-side feature detection and fallback.
+* Serving a graceful fallback via the `<link href="multi:..." rel="alternate">` mechanism.
 
-* JavaScript-based feature detection (of `<a>`'s `allow` attribute) so authors wishing to provide multilinks to their users can feature detect.
+* JavaScript-based feature detection so authors wishing to provide multilinks to their users can feature detect (TODO: determine the right mechanism).
 
 * A worst-case fallback to a plain text list of links. While inconvenient, the data is human-readable and usable.
 
@@ -317,11 +314,12 @@ We’ve considered some avenues for abuse and how they can be mitigated:
 
 * Using multilinks to spam a large number of popups.
 
-  Most browsers today include a popup blocker. Multilinks should also be blocked unless the user took an action. Additionally, origins must be granted
-  a permission to open a multilink.
+  Most browsers today include a popup blocker. Multilinks should also be blocked unless the user took an action. Before opening a multilink view, the
+  browser can show the user a confirmation dialog, allowing them to see the URLs and take different actions or cancel. See
+  [Restrictions](#restrictions).
 
-  An opened multilink should be grouped in the browser’s UI somehow so that an unwanted link doesn’t disorient or frustrate a user and the whole group
-  can be easily closed at once.
+  An opened multilink should be grouped in the browser’s UI somehow so that an unwanted multilink doesn’t disorient or frustrate a user and the whole
+  group can be easily closed at once.
 
 * Resource usage
 
@@ -367,7 +365,7 @@ We’ve considered some avenues for abuse and how they can be mitigated:
   of trusted origins:
 
   ```
-  uri-list:https://mybank.com/;https://mybank.evil.com/login;login.example.com
+  multi:https://mybank.com/;https://mybank.evil.com/login;login.example.com
   ```
 
   User agents will load these URLs in their normal way, which includes any kind of phishing and malicious site detection services, for example,
