@@ -119,7 +119,7 @@ with additional proprietary features available when opened from matching browser
   * Introduce a `multi:` URL scheme to allow users to easily share multilinks.
   * Add an opt-in for for anchors to non-`multi` schemes to allow opening multilinks.
   * Define restrictions for when a multilink can open multiple pages.
-  * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
+  * Allow a fallback for non-implementing agents via `<link rel="alternate">`.
 
 ### Handling text/uri-list media type
 
@@ -256,8 +256,8 @@ Examples:
 <a href="http://redirect.to?u=my-text-uri-list">blocked text/uri-list</a>
 ```
 
-Note: To "block" means to avoid opening all the links simultaneously. The user agent may still wish to present a single-page view listing the links
-(see below).
+Note: To "block" means to avoid opening all the links simultaneously. The user agent may degrade gracefully by showing a single-page view listing the
+links (see below).
 
 ### Restrictions
 
@@ -283,14 +283,26 @@ The experience of receiving a `text/uri-list` in a non-implementing user agent w
 order to guarantee a baseline experience, it's expected that a common use case (until most users' browsers add support) will be to use a "redirector"
 service which feature detects multilink support on the client and serves a fallback experience to non-implementing clients.
 
-Since the browser will know ahead of time whether an anchor may open a multilink (see the [Anchor-link-opt-in section](#anchor-link-opt-in)), it can
-append `text/uri-list` to the `Accept:` header of the request. The server can use the absence of this media type as a signal to serve a fallback, for
-example: an HTML page with a list clickable links.
+Such a service can respond with an ordinary `text/html` document but include a `<link>` to the desired multilink. Implementing agents can immediately
+"redirect" the user to the multilink view while a non-implementing agent will render the HTML document which can render the multilink as a list of
+clickable hyperlinks, for [example](https://pagecollection.glitch.me/link.html):
 
-_Note: The HTML spec [discourages](https://wiki.whatwg.org/wiki/Why_not_conneg) content-negotiation as a solution, though this seems less like a
-"choice" and more like a feature-detection which could be removed in the future. Is there a better alternative for request-time feature detection? One
-option would be a `<meta>` tag on an always-served fallback page that supporting agents can interpret as `text/uri-list` content and open. But that
-would lose the redirect chain which is useful for permissions._
+```
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <link rel="alternate" href="multi:https://example.com;https://example2.com">
+      <script>
+        const urls = document.querySelector('link').href.substr(6).split(';');
+        for (let url of urls) {
+          // ...
+        }
+      </script>
+      ...
+```
+
+TODO ([Issue#9](https://github.com/bokand/page-collection/issues/9): It should be possible to do Javascript feature detection. Perhaps `'multilink' in
+navigator`?
 
 ## Considerations
 
@@ -414,7 +426,7 @@ All the usual accessibility issues in UI apply; however, we believe these are al
 
 #### data:text/html URL
   
-Using a `data:text/html` URL to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `multi:` link.
+Using a `data:text/html` URL to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `multi:` URL.
 
 This was discarded as an option as `data:` URLs are considered non-secure - even if they could be linkified, we don't want to train users to click on
 `data:` links.
