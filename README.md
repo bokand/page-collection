@@ -452,51 +452,10 @@ It also precludes native-to-web use cases, such as opening a multilink from a us
 
 ### Future extension
 
-Should multilinks become common, applications may wish to enable enhancements to make them more useful. This section explores some
-potential ideas and how multilinks could be adapted in a backwards-compatible way. These ideas are omitted from the proposal but listed here to ensure
-such future extensibility is considered.
+`text/uri-list` is a simple format. For the use cases explored above, it seems like a good fit so inventing a new format seems unnecessary.
 
-#### Hierarchical Lists
+However, if this proposal succeeds it's possible that new, more complex use cases will emerge. For example, sharing bookmark folders would require
+hierarchical lists or live-collaboration requiring certain arguments. These use cases wouldn't be easily extended into `text/uri-list`.
 
-Resources are often grouped in a nesting hierarchy. For example, many web browsers allow storing “bookmarks” in nested folders for organization. Such
-applications wish to enable import/export using a multilink.
-
-This could be achieved by extending the `text/uri-list` representation with some marker denoting nesting depth. For example: '<', '>' characters in a
-comment:
-
-```
-foo.com
-#< examples-folder
-#<< good-examples
-example1.good.com
-example2.good.com
-#>>
-#<< bad-examples
-example1.bad.com
-example2.bad.com
-#>>
-#>
-```
-
-Produces a hierarchy like:
-
-```
-foo.com
-Examples
-  Good Examples
-    example1.good.com
-    example2.good.com
-  Bad Examples
-    example1.bad.com
-    example2.bad.com
-```
-
-For existing software that understands `text/uri-list` this will be interpreted as a simple flat list of all the provided URLs.
-
-The `multi` scheme could also support this by nesting `uri-list` URLs:
-
-```
-multi:https://foo.com;uri-list:https://a.com%3Bhttps://b.com%3Bhttps://c.com%3Ftype=grid-view&title=My%20example;https://bar.com?title=Bookmarks
-```
-
-While these would require tedious encoding operations, URLs such as this are likely to be machine generated.
+In that scenario, we expect a new a new purpose-built type (e.g. `text/multilink`) could be introduced at that time, with support for the more complex
+use cases. To avoid duplicating implementation, it could be defined such that `text/uri-list` maps into the new type.
