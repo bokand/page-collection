@@ -116,7 +116,7 @@ with additional proprietary features available when opened from matching browser
 ### Summarized Web-Facing Changes
 
   * Specify web browser handling of `text/uri-list` media types.
-  * Introduce a `multi:` URI scheme to allow users to easily share multilinks.
+  * Introduce a `multi:` URL scheme to allow users to easily share multilinks.
   * Add an opt-in for for anchors to non-`multi` schemes to allow opening multilinks.
   * Define a permission model for when a collection link may open multiple windows.
   * Use content negotiation to allow servers to feature detect user agents capable of handling text/uri-list.
@@ -139,7 +139,7 @@ https://en.wikipedia.org/wiki/Cat
 https://www.reddit.com/r/catmemes/
 ```
 
-It’s a very simple format: newline separated URIs - allowing comments via lines beginning with “#”. Its main existing use is as the data type when
+It’s a very simple format: newline separated URLs - allowing comments via lines beginning with “#”. Its main existing use is as the data type when
 [dragging links](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#dragging_links) and files.
 
 Today, most browsers render such a response as plain text (a usable fallback for non-implementing user agents!).
@@ -166,19 +166,19 @@ UI.
 
 Unrecognized options or content following the first `#?` line will be ignored.
 
-### Introduce a new URI scheme: uri-list
+### Introduce a new URL scheme: multi
 
 Handling `text/uri-list` is enough to enable multilinks but, on its own, has significant drawbacks.
 
 As noted in [WebArch](https://www.w3.org/TR/webarch/#URI-scheme:~:text=While%20Web%20architecture%20allows%20the%20definition%20of%20new%20schemes),
-introducing a new URI scheme is costly. This section explains the drawbacks of the considered alternatives and why a new URI scheme is the best option
+introducing a new URL scheme is costly. This section explains the drawbacks of the considered alternatives and why a new URL scheme is the best option
 despite the costs.
 
 Some alternatives we've considered:
 
   * A new HTML element (e.g. `<anchor-list>`)
   * A new attribute on the existing `<a>` element.
-  * A plain HTTP URI to a server responding with a `Content-Type: text/uri-list` header and a list of constituent links in the response body.
+  * A plain HTTP URL to a server responding with a `Content-Type: text/uri-list` header and a list of constituent links in the response body.
 
 Each of these comes with significant drawbacks:
 
@@ -187,10 +187,10 @@ Each of these comes with significant drawbacks:
     moved to a new address, the link becomes broken.
   * A user sharing such a link must trust whoever hosts their document or serves the response, making it more difficult to share a link privately.
 
-There are good reasons why a user may still wish to add a layer of indirection, e.g. to shorten a long list into a convenient short URI , or to enable
+There are good reasons why a user may still wish to add a layer of indirection, e.g. to shorten a long list into a convenient short URL , or to enable
 detection of non-implementing agents to provide an alternate representation. However, this choice should be left to users and applications.
 
-Another method that does avoid indirection is to use a data URI (defined in [RFC2397](https://www.rfc-editor.org/rfc/rfc2397)) with a `text/uri-list`
+Another method that does avoid indirection is to use a data URL (defined in [RFC2397](https://www.rfc-editor.org/rfc/rfc2397)) with a `text/uri-list`
 media type:
 
 ```
@@ -199,13 +199,13 @@ media type:
 
 However, links like this have usability issues that would be more easily addressed with a new scheme:
 
-* Users of communication apps (e.g. instant messaging, e-mail, etc.) often rely on the app “linkifying” a plaintext URI so the recipient can
-  open it with a click. This doesn't happen for `data:` URIs. While a new scheme will also require updates in such apps to support linkification,
+* Users of communication apps (e.g. instant messaging, e-mail, etc.) often rely on the app “linkifying” a plaintext URL so the recipient can
+  open it with a click. This doesn't happen for `data:` URLs. While a new scheme will also require updates in such apps to support linkification,
   `multi:` is less flexible than `data:`, making this more straightforward for linkifier software.
-* `data:` URIs can contain any kind of data, including executable script. Users can (and should) be wary of opening such links. Promoting them might
+* `data:` URLs can contain any kind of data, including executable script. Users can (and should) be wary of opening such links. Promoting them might
   unintentionally train users to be more trusting of potentially unsafe `data:` links.
-* Because `data:` URIs can be dangerous, they’re explicitly blocked in certain contexts. For example, most web browsers block `data:` URIs in anchor
-  links. Some browsers block HTTP redirects to `data:` URIs. Basing security restrictions on a `data:`'s media type seems unappealing.
+* Because `data:` URLs can be dangerous, they’re explicitly blocked in certain contexts. For example, most web browsers block `data:` URLs in anchor
+  links. Some browsers block HTTP redirects to `data:` URLs. Basing security restrictions on a `data:`'s media type seems unappealing.
 * The `text/uri-list` media type uses newlines as a delimiter and accepts comments, making for messier links. A `multi:` scheme allows for a
   friendlier syntax and mapping.
 
@@ -227,10 +227,10 @@ https://w3c.org
 The `multi` URL will also map query parameters to the aforementioned configuration options extension of `text/uri-list`, e.g.:
 
 ```
-uri-list:https://example.com;https://acme.org;https://w3c.org?group-name=Research%20links
+multi:https://example.com;https://acme.org;https://w3c.org?group-name=Research%20links
 ```
 
-Note that this is unambiguous as the `multi` scheme grammar requires percent-encoding `?` characters in the component URIs. The scheme is defined in
+Note that this is unambiguous as the `multi` scheme grammar requires percent-encoding `?` characters in the component URLs. The scheme is defined in
 more detail in [this draft](uri-scheme.md).
 
 ### Anchor link opt-in
@@ -247,13 +247,13 @@ Examples:
 
 ```html
 <!-- This link will open a multilink view if the response contains one. Otherwise it behaves as a normal link -->
-<a href="http://redirect.to?u=my-text-uri-list" allow="uri-list">URI List</a>
+<a href="http://redirect.to?u=my-text-uri-list" allow="uri-list">text/uri-list response</a>
 
 <!-- This link will always open in a multilink view -->
-<a href="multi:example.com/my-multilink">multi scheme link</a>
+<a href="multi:example.com/my-multilink">multi: scheme</a>
 
 <!-- This link will be blocked if the response is of type text/uri-list -->
-<a href="http://redirect.to?u=my-text-uri-list">blocks uri-lists</a>
+<a href="http://redirect.to?u=my-text-uri-list">blocked text/uri-list</a>
 ```
 
 Note: To "block" means to avoid opening all the links simultaneously. The user agent may still wish to present a single-page view listing the links
@@ -345,17 +345,17 @@ We’ve considered some avenues for abuse and how they can be mitigated:
   the web limits these leaks to a single bit. Enabling an attacker to load multiple pages simultaneously could be used to expand the scope of such
   attacks.
 
-  Similarly, there are [efforts to prevent user tracking](https://privacycg.github.io/nav-tracking-mitigations/) via URI parameters. Being able to
-  open multiple links simultaneously could complicate those efforts (eg. by spreading user identifiers over multiple URIs/page loads).
+  Similarly, there are [efforts to prevent user tracking](https://privacycg.github.io/nav-tracking-mitigations/) via URL parameters. Being able to
+  open multiple links simultaneously could complicate those efforts (eg. by spreading user identifiers over multiple URLs/page loads).
 
 * Link obfuscation
 
   It’s helpful for users to see where a link will take them before clicking on it. Most user agents (when using a hover capable device, e.g. a mouse)
-  show a link’s URI on hover.
+  show a link’s URL on hover.
 
   A multilink complicates this since the existing UI cannot convey to the user all the pages the link will load.
 
-  Today, link URIs can be obfuscated by malicious parties, for example: by changing the URI in a mousedown handler, so we don’t think multilinks would
+  Today, link URLs can be obfuscated by malicious parties, for example: by changing the URL in a mousedown handler, so we don’t think multilinks would
   make the situation materially worse.
 
   However, to avoid surprising users, browsers can provide new UI to help users decide whether to open a multilink. For example, by showing an
@@ -370,7 +370,7 @@ We’ve considered some avenues for abuse and how they can be mitigated:
   uri-list:https://mybank.com/;https://mybank.evil.com/login;login.example.com
   ```
 
-  User agents will load these URIs in their normal way, which includes any kind of phishing and malicious site detection services, for example,
+  User agents will load these URLs in their normal way, which includes any kind of phishing and malicious site detection services, for example,
   Google’s [SafeBrowsing](https://safebrowsing.google.com/) service.
 
 
@@ -381,7 +381,7 @@ this mode, the operator of such a service is responsible for storing the constit
 aware that links they share using these services would be visible to the operator of the service.
 
 Example: A user downloads an extension “Foobar” to generate multilinks. The user selects multiple tabs and asks Foobar for a multilink to the selected
-tabs. Foobar uploads the URIs of the selected tabs to `https://foobar.com/upload` and returns a short URL to the user to access it:
+tabs. Foobar uploads the URLs of the selected tabs to `https://foobar.com/upload` and returns a short URL to the user to access it:
 `https://foobar.com/abcdefg`. The user shares this link with a friend. When loaded, the link opens all the same tabs in the friend’s browser. The
 constituent URLs of the multilink are visible not only to the user and their friend but also to the operator of `foobar.com`.
 
@@ -403,10 +403,10 @@ All the usual accessibility issues in UI apply; however, we believe these are al
 
 ## Prior Art
   
-* [text/uri-list](https://www.ietf.org/rfc/rfc2483.txt) - A media type for sending multiple URIs. Often used as the type when dragging links.
+* [text/uri-list](https://www.ietf.org/rfc/rfc2483.txt) - A media type for sending multiple URLs. Often used as the type when dragging links.
 
 * [text/x-moz-uri](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#:~:text=Mozilla%2Dspecific%20type-,text/x%2Dmoz%2Durl,-.%20If%20it%20appears)
-  Similar to above but allows providing titles for each URI
+  Similar to above but allows providing titles for each URL
 
 * [Open Multiple URLs](https://github.com/htrinter/Open-Multiple-URLs/) - Chrome and Firefox extension
 
@@ -414,24 +414,24 @@ All the usual accessibility issues in UI apply; however, we believe these are al
 
 ### Alternatives Considered
 
-#### data:text/html URI
+#### data:text/html URL
   
-Using a `data:text/html` URI to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `multi:` link.
+Using a `data:text/html` URL to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `multi:` link.
 
 This was discarded as an option as `data:` URLs are considered non-secure - even if they could be linkified, we don't want to train users to click on
 `data:` links.
 
-They'd also lead to exceptionally messy URIs, and would be difficult to linkify in messaging apps.
+They'd also lead to exceptionally messy URLs, and would be difficult to linkify in messaging apps.
 
 #### Fragment Directive
 
-Use a new fragment directive to append a list of URIs as a multilink:
+Use a new fragment directive to append a list of URLs as a multilink:
 
 ```
 https://firstpage.com#:~:multi=https://secondpage.com;https://thirdpage.com
 ```
 
-Fragment directives are stripped from the URI during navigation, so they won’t cause unintended interactions with script on the page.
+Fragment directives are stripped from the URL during navigation, so they won’t cause unintended interactions with script on the page.
 
 This has the benefit that a user opening this link in a non-implementing user agent will load `firstpage.com`, rather than seeing an error page.
 
@@ -439,7 +439,7 @@ This option was rejected since an error page may actually be a less-confusing ex
 
 #### HTML
 
-Amend HTML to allow anchor links to include multiple URIs, for example:
+Amend HTML to allow anchor links to include multiple URLs, for example:
 
 ```html
 <a hrefset="https://example1.com, https://example2.com">Multilink</a>
@@ -491,12 +491,12 @@ Examples
     example2.bad.com
 ```
 
-For existing software that understands `text/uri-list` this will be interpreted as a simple flat list of all the provided URIs.
+For existing software that understands `text/uri-list` this will be interpreted as a simple flat list of all the provided URLs.
 
-The `multi` scheme could also support this by nesting `uri-list` URIs:
+The `multi` scheme could also support this by nesting `uri-list` URLs:
 
 ```
 multi:https://foo.com;uri-list:https://a.com%3Bhttps://b.com%3Bhttps://c.com%3Ftype=grid-view&title=My%20example;https://bar.com?title=Bookmarks
 ```
 
-While these would require tedious encoding operations, URIs such as this are likely to be machine generated.
+While these would require tedious encoding operations, URLs such as this are likely to be machine generated.
