@@ -7,25 +7,25 @@ complex topic, comparing products when shopping, or planning a trip or outing. B
 allowing grouping of related tabs.
 
 It's also common for users to share content with others, get their thoughts, and make decisions together. Yet, the web's sharing mechanism,
-the link, remains 1-to-1; one link opens one page. This makes it difficult to share complicated context.
+the link, remains 1-to-1; one link opens one page. This makes it cumbersome to share complicated context.
 
 This is a proposal to enable grouping multiple destinations into a single link, a 1-to-many link. A browser opening such a link will open
 each of the constituent pages in a grouping UI, such as a tab group.
 
 <p align="center"><img src="pagecollection.svg" alt="A click on multilink URL opens multiple pages simultaneously"></p>
 
-A concrete example: get a link to all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab group
-containing the same pages.
+A concrete example: get a single link for all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab
+group containing the same pages.
 
-We're calling such a link a "multilink", an example of how it _might_ look:
+We're this a "multilink", an example of how it _might_ look:
 
 ```
 multi:https://example.com/pageA;https://en.wikipedia.org/wiki/URL;https://w3.org
 ```
 
-This explainer details challenges and ideas for this new form of linking. While some examples of a "multilink view" UI are provided, particularily
-with existing mechanisms such as tab groups, no specific UI is suggested or mandated in this proposal; how a multilink is presented is left to the
-discretion of the user agent.
+This explainer details challenges and ideas for this new form of linking. While some examples of a multilink "view" UI are provided, particularly
+with existing mechanisms such as tab groups, no specific UI is suggested or mandated in this proposal; the view into which a multilink is presented is
+left to the discretion of the user agent.
 
 ### Non-Goals
 
@@ -34,7 +34,7 @@ discretion of the user agent.
     links themselves.
   * Interoperable collaboration - there are emerging features that allow users to live-collaborate on a [shared group of
     tabs](#shared-tab-groups). While there's some overlap and potential for multilinks to improve these features in the short term,
-    our goal is to enable a richer linking primitive.
+    our goal is to instead enable a richer linking primitive.
 
 ## Status
 
@@ -93,10 +93,12 @@ could allow sharing a tab group using a multilink. At a minimum, a browser can r
 clickable hyperlinks.
 
 We envision browsers experimenting with new kinds of UIs in the future. For this reason, this proposal is UI agnostic. References to UI are provided
-for illustrative purposes but the exact view mechanism used when a multilink is navigated would be left to the user agent’s discretion.
-This proposal focuses instead on the specifics of the linking mechanism to ensure such links would be interoperable on the web.
+for illustrative purposes but the exact view mechanism used when a multilink is navigated would be left to the user agent’s discretion.  This proposal
+focuses instead on the specifics of the linking mechanism to ensure such links would be interoperable on the web.
 
-_Note: In addition, browsers could provide users with a convenient UI to multilinks; for example, by selecting multiple tabs to share. However, this
+We'll use the generic term "multilink view" when referring to the UI that a multilink opens into. A tab group is one possible multilink view.
+
+_Note: In addition, browsers could provide users with a convenient UI to *create* multilinks; for example, by selecting multiple tabs to share. However, this
 doesn’t affect interoperability of these links so isn’t discussed here._
 
 ### Shared Tab Groups
@@ -115,64 +117,17 @@ with additional proprietary features available when opened from matching browser
 
 ### Summarized Web-Facing Changes
 
-  * Specify web browser handling of `text/uri-list` media types.
-  * Introduce a `multi:` URL scheme to allow users to easily share multilinks.
-  * Add an opt-in for for anchors to non-`multi` schemes to allow opening multilinks.
+  * Introduce a `multi:` URL scheme that encodes multiple constituent links into a single multilink.
+  * Allow a server-based fallback for non-implementing agents via `<link rel="alternate">`.
+  * Add an opt-in for anchor elements enabling them to open a non-`multi` scheme URL as a multilink.
+    * When used with the above fallback.
   * Define restrictions for when a multilink can open multiple pages.
-  * Allow a fallback for non-implementing agents via `<link rel="alternate">`.
-
-### Handling text/uri-list media type
-
-The core of the proposal is to make browsers process a `Content-Type: text/uri-list` response in a user-friendly way.
-
-`text/uri-list` is an existing media type in the [IANA media types registry](https://www.iana.org/assignments/media-types/media-types.xhtml). It is
-defined by [RFC2483](https://www.rfc-editor.org/rfc/rfc2483.html#section-5).
-
-Here’s an example of valid `text/uri-list` content:
-
-```
-# This is a comment
-# A link about dogs
-https://en.wikipedia.org/wiki/Dog#Intelligence
-# Links about cats
-https://en.wikipedia.org/wiki/Cat
-https://www.reddit.com/r/catmemes/
-```
-
-It’s a very simple format: newline separated URLs - allowing comments via lines beginning with “#”. Its main existing use is as the data type when
-[dragging links](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#dragging_links) and files.
-
-Today, most browsers render such a response as plain text (a usable fallback for non-implementing user agents!).
-
-Without being overly prescriptive, this proposal specifies that browsers should attempt open each constituent link and group the opened pages together
-in some "multilink view" UI. The exact UI mechanics are left to user agent discretion. One example of such a multilink view could be "tab groups";
-however, this could be an area of experimentation and exploration.
-
-In some contexts or circumstances, the user agent may decide opening all links is inappropriate or infeasible (e.g. see [opt-in](#anchor-link-opt-in)
-and [restrictions](#restrictions) sections. Instead, the user agent may provide a friendly single-page "fallback" which shows a clickable link to each
-linked resource.
-
-We also extended `text/uri-list` (in a backwards compatible way) to allow adding some configuration options. Options can be specified at the end of
-the resource by placing a key=value pair in a comment with ‘?’ as the first character. For example:
-
-```
-https://en.wikipedia.org/wiki/Cat
-https://www.reddit.com/r/catmemes/
-#?group-name=Cat Links
-```
-
-Only a single configuration option will be supported at this time: `group-name`. A user agents can use this to label the group of opened pages in its
-UI.
-
-Unrecognized options or content following the first `#?` line will be ignored.
 
 ### Introduce a new URL scheme: multi
 
-Handling `text/uri-list` is enough to enable multilinks but, on its own, has significant drawbacks.
-
 As noted in [WebArch](https://www.w3.org/TR/webarch/#URI-scheme:~:text=While%20Web%20architecture%20allows%20the%20definition%20of%20new%20schemes),
 introducing a new URL scheme is costly. This section explains the drawbacks of the considered alternatives and why a new URL scheme is the best option
-despite the costs.
+despite the costs. More details on alternatives are in the [alternatives considered](#alternatives-considered) section.
 
 Some alternatives we've considered:
 
@@ -182,12 +137,17 @@ Some alternatives we've considered:
 
 Each of these comes with significant drawbacks:
 
-  * Requires a user to author a document or host a server. This requires time, effort, and technical skill, excluding a majority of the web’s users.
-  * Uses an extra layer of indirection so its lifetime additionally relies on the intermediate server. I.e. if the server is ever decommissioned or
-    moved to a new address, the link becomes broken.
-  * A user sharing such a link must trust whoever hosts their document or serves the response, making it more difficult to share a link privately.
+  * Each requires a user to author a document or host a server. This requires time, effort, and technical skill, excluding a majority of the web’s
+    users.
+  * The HTML-based approaches require the user to own the HTML on which the link will be shared (precludes chat or social media without site support,
+    SMS entirely).
+  * The server-side approach:
+    * Requires an extra layer of indirection so its lifetime additionally relies on the intermediate server. I.e. if the server is ever decommissioned
+      or moved to a new address, the link becomes broken.
+    * Adds network latency.
+    * A user sharing such a link must trust whoever serves the response, making it more difficult to share a link privately.
 
-There are good reasons why a user may still wish to add a layer of indirection, e.g. to shorten a long list into a convenient short URL , or to enable
+There are good reasons why a user may still wish to add a layer of indirection, e.g. to shorten a long list into a convenient short URL, or to enable
 detection of non-implementing agents to provide an alternate representation. However, this choice should be left to users and applications.
 
 Another method that does avoid indirection is to use a data URL (defined in [RFC2397](https://www.rfc-editor.org/rfc/rfc2397)) with a `text/uri-list`
@@ -210,13 +170,13 @@ However, links like this have usability issues that would be more easily address
   friendlier syntax and mapping.
 
 The proposed `multi:` scheme is very similar to `data:text/uri-list`, albeit with a dedicated syntax and more user-friendly form. When a user-agent
-operates on a `multi:`, it will interpret the inline data and map it to a `text/uri-list` resource. Here's an example of a `multi` link:
+operates on a `multi:`, it will parse the inline data into a list of URLs to open. Here's an example of a `multi` link:
 
 ```
 multi:https://example.com;https://acme.org;https://w3c.org
 ```
 
-Which is mapped to the following `text/uri-list` resource:
+Which is mapped to:
 
 ```
 https://example.com
@@ -224,7 +184,7 @@ https://acme.org
 https://w3c.org
 ```
 
-The `multi` URL will also map query parameters to the aforementioned configuration options extension of `text/uri-list`, e.g.:
+The `multi` URL can also support query parameters for configuration options, e.g.:
 
 ```
 multi:https://example.com;https://acme.org;https://w3c.org?group-name=Research%20links
@@ -233,55 +193,17 @@ multi:https://example.com;https://acme.org;https://w3c.org?group-name=Research%2
 Note that this is unambiguous as the `multi` scheme grammar requires percent-encoding `?` characters in the component URLs. The scheme is defined in
 more detail in [this draft](uri-scheme.md).
 
-### Anchor link opt-in
+Only a single configuration option will be supported initially: `group-name`. User agents can use this to give a label the group of opened pages in
+its UI.
 
-Since a multilink is defined by the `Content-Type` of a response, ordinary `http(s)` scheme links could return a multilink resource. This may be
-surprising and undesirable for authors in some cases. Additionally, it makes it difficult for a user agent to determine ahead of time if a link may be
-a multilink (useful for feature detection and UI).
+Unrecognized options will be ignored.
 
-The solution is for authors providing a multilink to be explicit about it. This proposal would add an `allow=uri-list` attribute to the anchor tag
-(`<a>`) to let authors note which anchors *may* open a multilink. Using a `multi` scheme URL in the the anchor's `src` is itself explicit enough and
-does not require `allows=uri-list`.
+### Fallback and Feature Detection
 
-Examples:
-
-```html
-<!-- This link will open a multilink view if the response contains one. Otherwise it behaves as a normal link -->
-<a href="http://redirect.to?u=my-text-uri-list" allow="uri-list">text/uri-list response</a>
-
-<!-- This link will always open in a multilink view -->
-<a href="multi:example.com/my-multilink">multi: scheme</a>
-
-<!-- This link will be blocked if the response is of type text/uri-list -->
-<a href="http://redirect.to?u=my-text-uri-list">blocked text/uri-list</a>
-```
-
-Note: To "block" means to avoid opening all the links simultaneously. The user agent may degrade gracefully by showing a single-page view listing the
-links (see below).
-
-### Restrictions
-
-To prevent abuse, user agents may place restrictions on when a multilink is allowed to open into a multilink view:
-
- * Requiring `rel=multilink` on `<a>` or `<area>` and an equivalent `windowFeature` for `window.open`.
- * The user must explicitly agree to open the multilink view via some sort of confirmation UI. For
-   [example](https://pagecollection.glitch.me/prompt.html):
-   <p align="center"><img height="400" src="inline-prompt.png" alt="A potential confirmation prompt, shown at the link location, allowing the user to see and select URLs and open them into a tab group"></p>
-
-In the absence of these requirements the user agent can gracefully degrade to a less functional single page fallback. For example: an HTML page with
-list of clickable links, perhaps with a button to open into the browser's multilink view UI.
-
-  <p align="center"><img height="600" src="fallback.png" alt="The single page fallback, showing a list of clickable links with a button to open into a new tab group"></p>
-
-<p align="center">
-  <em>An <a href="https://pagecollection.glitch.me/fallback.html">example</a> of what the fallback might look like.</em>
-</p>
-
-### Feature Detection
-
-The experience of receiving a `text/uri-list` in a non-implementing user agent will be suboptimal: a plain text listing with unclickable links. In
-order to guarantee a baseline experience, it's expected that a common use case (until most users' browsers add support) will be to use a "redirector"
-service which feature detects multilink support on the client and serves a fallback experience to non-implementing clients.
+The experience of opening a multilink in a non-implementing user agent will be poor: unrecognized schemes will result in an error or request the user
+to pick a handler app. In order to guarantee a baseline experience, it's expected that a common use case (until most users' browsers add support) will
+be to use a "redirector" service which provides a fallback HTML page for non-implementing browsers while being interpreted by implementing browsers as
+a multilink.
 
 Such a service can respond with an ordinary `text/html` document but include a `<link>` to the desired multilink. Implementing agents can immediately
 "redirect" the user to the multilink view while a non-implementing agent will render the HTML document which can render the multilink as a list of
@@ -301,8 +223,53 @@ clickable hyperlinks, for [example](https://pagecollection.glitch.me/link.html):
       ...
 ```
 
-TODO ([Issue#9](https://github.com/bokand/page-collection/issues/9): It should be possible to do Javascript feature detection. Perhaps `'multilink' in
+Additionally, web authors wishing to provide multilinks from their HTML documents can conditionally include them by feature detecting on the client.
+
+TODO ([Issue#9](https://github.com/bokand/page-collection/issues/9): How do we support script-based feature detection? Perhaps `'multilink' in
 navigator`?
+
+### Anchor link opt-in
+
+The `<link>` based fallback enables ordinary `http(s)` scheme links to return a multilink resource. This may be surprising and undesirable for authors
+in some cases. Additionally, it makes it difficult for a user agent to determine ahead of time if a link may be a multilink (a useful property for UI).
+
+The solution is for authors providing multilinks to be explicit about it. We enable this by adding a new `rel` attribute value `multilink` to let
+authors annotate which anchors *may* open a multilink. Using a `multi` scheme URL in the anchor's `src` is itself explicit enough and does not require
+`rel=multilink`.
+
+Examples:
+
+```html
+<!-- This link will open in a multilink view if the response HTML contains a multilink in a <link>. Otherwise it behaves as a normal link -->
+<a href="http://redirect.to?u=my-multilink" rel="multilink">HTML response</a>
+
+<!-- This link will always open in a multilink view -->
+<a href="multi:example.com/my-multilink">multi: scheme</a>
+
+<!-- This link will not automatically open in a multilink view, even if the response contains a multilink <link>-->
+<a href="http://redirect.to?u=my-multilink">HTML response</a>
+```
+
+Note: To "block" means to avoid opening all the links simultaneously. The user agent may degrade gracefully by showing a single-page view listing the
+links (see below).
+
+### Restrictions
+
+To prevent abuse, user agents may place restrictions on when a multilink is allowed to open into a multilink view:
+
+ * Requiring `rel=multilink` on `<a>` or `<area>` and an equivalent `windowFeature` for `window.open`.
+ * The user must explicitly agree to open the multilink view via some sort of confirmation UI. For
+   [example](https://pagecollection.glitch.me/prompt.html):
+   <p align="center"><img height="400" src="inline-prompt.png" alt="A potential confirmation prompt, shown at the link location, allowing the user to see and select URLs and open them into a tab group"></p>
+
+In the absence of these requirements the user agent can gracefully degrade to a less functional single page fallback. For example: an HTML page with
+list of clickable links, perhaps with an option to open into the multilink view UI.
+
+  <p align="center"><img height="600" src="fallback.png" alt="The single page fallback, showing a list of clickable links with a button to open into a new tab group"></p>
+
+<p align="center">
+  <em>An <a href="https://pagecollection.glitch.me/fallback.html">example</a> of what the fallback might look like.</em>
+</p>
 
 ## Considerations
 
@@ -424,6 +391,36 @@ All the usual accessibility issues in UI apply; however, we believe these are al
 
 ### Alternatives Considered
 
+#### Content-Type: text/uri-list
+
+Make browsers process a `Content-Type: text/uri-list` response in a user-friendly way.
+
+`text/uri-list` is an existing media type in the [IANA media types registry](https://www.iana.org/assignments/media-types/media-types.xhtml).
+It is defined by [RFC2483](https://www.rfc-editor.org/rfc/rfc2483.html#section-5).
+
+Here’s an example of valid `text/uri-list` content:
+
+```
+# This is a comment
+# A link about dogs
+https://en.wikipedia.org/wiki/Dog#Intelligence
+# Links about cats
+https://en.wikipedia.org/wiki/Cat
+https://www.reddit.com/r/catmemes/
+```
+
+Today, most browsers render such a response as plain text (a usable fallback for non-implementing user agents!).
+
+In this approach, an ordinary HTTP-scheme link would respond with a `Content-Type: text/uri-list` header. User agents would interpret this content type
+as a multilink and attempt open each constituent link.
+
+The main drawback is that this _forces_ multilinks to be hosted on a server which adds indirection and reduces privacy. While the plaintext fallback
+in non-implementing agents is better than the failure-mode for the `multi`-scheme, it's still not very usable so would likely require a
+linkified-fallback anyway.
+
+Note: while this approach isn't our primary proposal it can be cheaply implemented side-by-side with the `multi`-scheme. The two approaches could be
+complementary.
+
 #### data:text/html URL
   
 Using a `data:text/html` URL to navigate to an HTML page containing a list of the links, or feature-detect and redirect to a `multi:` URL.
@@ -458,14 +455,3 @@ Amend HTML to allow anchor links to include multiple URLs, for example:
 This approach could work for anyone with the ability to author a page but precludes direct user-to-user sharing.
 
 It also precludes native-to-web use cases, such as opening a multilink from a user's native email client.
-
-
-### Future extension
-
-`text/uri-list` is a simple format. For the use cases explored above, it seems like a good fit so inventing a new format seems unnecessary.
-
-However, if this proposal succeeds it's possible that new, more complex use cases will emerge. For example, sharing bookmark folders would require
-hierarchical lists or live-collaboration requiring certain arguments. These use cases wouldn't be easily extended into `text/uri-list`.
-
-In that scenario, we expect a new a new purpose-built type (e.g. `text/multilink`) could be introduced at that time, with support for the more complex
-use cases. To avoid duplicating implementation, it could be defined such that `text/uri-list` maps into the new type.
