@@ -411,6 +411,9 @@ Today, most browsers render such a response as plain text (a usable fallback for
 In this approach, an ordinary HTTP-scheme link would respond with a `Content-Type: text/uri-list` header. User agents would interpret this content type
 as a multilink and attempt open each constituent link.
 
+Feature detection/fallback can be provided by using content negotiation - the browser can add `text/uri-list` to the `Accept:` header of any request
+originating from a link with `rel=multilink`.
+
 The main drawback is that this _forces_ multilinks to be hosted on a server which adds indirection and reduces privacy. While the plaintext fallback
 in non-implementing agents is better than the failure-mode for the `multi`-scheme, it's still not very usable so would likely require a
 linkified-fallback anyway.
