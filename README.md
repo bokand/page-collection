@@ -17,7 +17,7 @@ each of the constituent pages in a grouping UI, such as a tab group.
 A concrete example: get a single link for all the pages in your tab group. Share the link with a friend. The friend clicks the link to open a tab
 group containing the same pages.
 
-We're this a "multilink", an example of how it _might_ look:
+We call this a "multilink", an example of how it _might_ look:
 
 ```
 multi:https://example.com/pageA;https://en.wikipedia.org/wiki/URL;https://w3.org
